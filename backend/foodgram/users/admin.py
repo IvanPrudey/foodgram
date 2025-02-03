@@ -1,3 +1,20 @@
 from django.contrib import admin
 
-# Register your models here.
+from users.models import User
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    """Админ-панель для управления пользователями."""
+
+    list_display = (
+        'id',
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'role',
+    )
+    list_filter = ('email', 'username')
+    search_fields = ('role', 'username')
+    ordering = ('username')
