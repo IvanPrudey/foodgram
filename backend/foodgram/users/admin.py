@@ -17,4 +17,4 @@ class UserAdmin(admin.ModelAdmin):
     )
     list_filter = ('email', 'username')
     search_fields = ('role', 'username')
-    ordering = ('username')
+    ordering = ('username',)
