@@ -13,7 +13,6 @@ from users.validators import validate_username, validate_username_me
 
 class UserRole(models.TextChoices):
     """Роли пользователей."""
-
     USER = 'user', _('User')
     ADMIN = 'admin', _('Admin')
 
@@ -29,7 +28,6 @@ class User(AbstractUser):
         help_text=(
             'Поле обязательно к заполнению. '
             'Необходимо использовать только буквы и цифры. '
-            'Максимальная длина 128 символов.'
         ),
         error_messages={
             'unique': 'Пользователь с таким именем уже существует.'
