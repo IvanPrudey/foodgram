@@ -13,6 +13,7 @@ from users.validators import validate_username, validate_username_me
 
 class UserRole(models.TextChoices):
     """Роли пользователей."""
+
     USER = 'user', _('User')
     ADMIN = 'admin', _('Admin')
 
