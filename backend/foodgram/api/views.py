@@ -1,3 +1,15 @@
-from django.shortcuts import render
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-# Create your views here.
+from recipes.models import Ingredient, Recipe, Tag
+
+
+class IngredientViewSet(ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+
+
+class RecipeViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+
+
+class TagViewSet(ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
