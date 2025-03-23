@@ -18,3 +18,7 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = ('email', 'username')
     search_fields = ('role', 'username')
     ordering = ('username',)
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
