@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import CheckConstraint, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 
@@ -74,3 +75,43 @@ class User(AbstractUser):
     def __str__(self) -> str:
         """Возвращает имя пользователя."""
         return self.username
+
+
+class Subscription(models.Model):
+    """
+    Модель для хранения информации о подписках пользователей друг на друга.
+    Запрещает повторные подписки и подписки на самого себя.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+        verbose_name='Подписчик',
+        help_text='Укажите пользователя, который подписывается'
+    )
+    subscribed_to = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscribers',
+        verbose_name='Автор подписки',
+        help_text='Укажите пользователя, на которого подписываются'
+    )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        ordering = ['-id']
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'subscribed_to'],
+                name='unique_user_subscription'
+            ),
+            CheckConstraint(
+                check=~Q(user=models.F('subscribed_to')),
+                name='no_self_subscription'
+            )
+        ]
+
+    def __str__(self):
+        return f'Подписка: {self.user} -> {self.subscribed_to}'
