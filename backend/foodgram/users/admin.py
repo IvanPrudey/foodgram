@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from users.models import User
+from users.models import User, Subscription
 
 
 @admin.register(User)
@@ -22,3 +22,13 @@ class UserAdmin(admin.ModelAdmin):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    """Админ-панель подписки."""
+
+    list_display = ('id', 'user', 'subscribed_to')
+    search_fields = ('user__username', 'subscribed_to__username')
+    list_filter = ('user', 'subscribed_to')
+    fields = ('user', 'subscribed_to')
