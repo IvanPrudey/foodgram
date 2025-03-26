@@ -56,6 +56,13 @@ class User(AbstractUser):
         choices=UserRole.choices,
         default=UserRole.USER
     )
+    avatar = models.ImageField(
+        upload_to='users/avatars',
+        verbose_name='Фото профиля',
+        null=True,
+        default=None,
+        help_text='Загрузите фото профиля'
+    )
 
     @property
     def is_user(self) -> bool:
