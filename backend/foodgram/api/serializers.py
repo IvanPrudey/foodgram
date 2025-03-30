@@ -1,11 +1,20 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import (
+    Ingredient,
+    IngredientInRecipe,
+    Favorite,
+    Recipe,
+    ShoppingCart,
+    Tag
+)
 from users.models import User, Subscription
+from users.serializers import CustomUserSerializer
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """Для отображения ингредиентов."""
 
     class Meta:
         model = Ingredient
@@ -13,16 +22,69 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """Для отображения тегов."""
 
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
 
 
+class IngredientInRecipeSerializer(serializers.ModelSerializer):
+    """Отображение модели, связывающей ингредиенты и рецепт."""
+
+    id = serializers.IntegerField(source='ingredient.id', read_only=True)
+    name = serializers.CharField(source='ingredient.name', read_only=True)
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit',
+        read_only=True
+    )
+
+    class Meta:
+        model = IngredientInRecipe
+        fields = ['id', 'name', 'amount', 'measurement_unit']
+
+
 class RecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор просмотра модели Рецепт."""
+
+    tags = TagSerializer(many=True)
+    author = CustomUserSerializer(read_only=True)
+    ingredients = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
+        fields = [
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        ]
+
+    def get_ingredients(self, obj):
+        ingredients = IngredientInRecipe.objects.filter(recipe=obj)
+        return IngredientInRecipeSerializer(ingredients, many=True).data
+
+    def _check_user_relation(self, obj, model):
+        request = self.context.get('request')
+        return (
+            request and request.user.is_authenticated and model.objects.filter(
+                user=request.user, recipe_id=obj
+            ).exists()
+    )
+
+    def get_is_favorited(self, obj):
+        return self._check_user_relation(obj, Favorite)
+
+    def get_is_in_shopping_cart(self, obj):
+        return self._check_user_relation(obj, ShoppingCart)
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
