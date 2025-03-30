@@ -78,7 +78,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             request and request.user.is_authenticated and model.objects.filter(
                 user=request.user, recipe_id=obj
             ).exists()
-    )
+        )
 
     def get_is_favorited(self, obj):
         return self._check_user_relation(obj, Favorite)
@@ -160,8 +160,35 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
 
 
 class ShowFavoriteSerializer(serializers.ModelSerializer):
-    """Для отображения избранного."""
+    """Отображение избранного."""
 
     class Meta:
         model = Recipe
         fields = ['id', 'name', 'image', 'cooking_time']
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Отображение списка корзины."""
+
+    class Meta:
+        model = ShoppingCart
+        fields = ['user', 'recipe']
+
+    def to_representation(self, instance):
+        context = {'request': self.context.get('request')}
+        return ShowFavoriteSerializer(instance.recipe, context=context).data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для работы с избранными рецептами."""
+
+    class Meta:
+        model = Favorite
+        fields = ['user', 'recipe']
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return ShowFavoriteSerializer(
+            instance.recipe,
+            context={'request': request}
+        ).data
