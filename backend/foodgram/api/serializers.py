@@ -1,3 +1,6 @@
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -11,6 +14,11 @@ from recipes.models import (
 )
 from users.models import User, Subscription
 from users.serializers import CustomUserSerializer
+
+
+VALIDATE_MSG_1 = 'Должно быть наличие хотя бы одного ингредиента!'
+VALIDATE_MSG_2 = 'Ингредиенты должны быть уникальными!'
+VALIDATE_MSG_3 = 'Укажите положительное количество каждого ингредиента!'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -192,3 +200,115 @@ class FavoriteSerializer(serializers.ModelSerializer):
             instance.recipe,
             context={'request': request}
         ).data
+
+
+class AddIngredientRecipeSerializer(serializers.ModelSerializer):
+    """Отображение добавления ингредиента в рецепт."""
+
+    class Meta:
+        model = IngredientInRecipe
+        fields = ['id', 'amount']
+        extra_kwargs = {
+            'id': {'required': True},
+            'amount': {'required': True}
+        }
+
+
+class CreateRecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания и обновления рецептов.
+    Обрабатывает данные рецепта, включая ингредиенты, теги и изображение.
+    """
+
+    author = CustomUserSerializer(read_only=True)
+    ingredients = AddIngredientRecipeSerializer(many=True)
+    tags = TagSerializer(many=True)
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id',
+            'author',
+            'ingredients',
+            'tags',
+            'image',
+            'name',
+            'text',
+            'cooking_time'
+        ]
+
+    @staticmethod
+    def _check_unique(values, model=None):
+        """Проверка уникальности значений."""
+        seen = set()
+        for value in values:
+            item = value['id'] if model is None else get_object_or_404(
+                model, id=value['id']
+            )
+            if item in seen:
+                return True
+            seen.add(item)
+        return False
+
+    def validate_ingredients(self, data):
+        """Проверяет валидность данных об ингредиентах."""
+        ingredients = data
+        if not ingredients:
+            raise serializers.ValidationError(
+                {'ingredients': VALIDATE_MSG_1}
+            )
+
+        if self._check_unique(
+            self.initial_data.get('ingredients'), Ingredient
+        ):
+            raise serializers.ValidationError(
+                {'ingredient': VALIDATE_MSG_2}
+            )
+
+        if any(int(item['amount']) <= 0 for item in ingredients):
+            raise serializers.ValidationError(
+                {'amount': VALIDATE_MSG_3}
+            )
+        return data
+
+    def validate_tags(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                {'tags': 'Нужно выбрать хотя бы один тег!'}
+            )
+
+        if self._check_unique(value):
+            raise serializers.ValidationError(
+                {'tags': 'Теги должны быть уникальными!'}
+            )
+        return value
+
+    @staticmethod
+    def _create_recipe_objects(recipe, tags, ingredients):
+        """Создание связанных объектов рецепта."""
+        recipe.tags.set(tag['id'] for tag in tags)
+
+        IngredientInRecipe.objects.bulk_create([
+            IngredientInRecipe(
+                ingredient_id=ingredient['id'],
+                recipe=recipe,
+                amount=ingredient['amount']
+            ) for ingredient in ingredients
+        ])
+        return recipe
+
+    @transaction.atomic
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = super().create(validated_data)
+        return self._create_recipe_objects(recipe, tags, ingredients)
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        instance.tags.clear()
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = super().update(instance, validated_data)
+        return self._create_recipe_objects(recipe, tags, ingredients)

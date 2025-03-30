@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -21,6 +21,7 @@ from api.serializers import (
     SubscriptionSerializer,
     TagSerializer
 )
+from api.filters import IngredientFilter
 from recipes.models import (
     Ingredient,
     IngredientInRecipe,
@@ -38,6 +39,9 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = IsAdminOrReadOnly
+    pagination_class = None
+    filter_backends = (IngredientFilter,)
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(ModelViewSet):
@@ -182,4 +186,3 @@ class ShowSubscriptionsView(ListAPIView):
 
     def get_queryset(self):
         return User.objects.filter(author__user=self.request.user)
-
