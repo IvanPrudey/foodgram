@@ -185,6 +185,11 @@ class ShoppingCart(models.Model):
                 name='user_shoppingcart_unique'
             )
         ]
+        verbose_name = 'Рецепт в корзине'
+        verbose_name_plural = 'Рецепты в корзине'
+
+    def __str__(self):
+        return self.name
 
 
 class Favorite(models.Model):
@@ -210,3 +215,8 @@ class Favorite(models.Model):
                 name='user_favorite_unique'
             )
         ]
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+
+    def __str__(self):
+        return self.name

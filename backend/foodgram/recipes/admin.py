@@ -68,4 +68,3 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ['user', 'recipe']
     search_fields = ['user__username', 'user__email']
     empty_value_display = '-пусто-'
-
