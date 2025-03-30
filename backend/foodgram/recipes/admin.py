@@ -1,5 +1,12 @@
 from django.contrib import admin
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    IngredientInRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag
+)
 
 
 @admin.register(Ingredient)
@@ -43,3 +50,22 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = ('author', 'tags', 'pub_date')
     filter_horizontal = ('ingredients', 'tags')
     empty_value_display = '-пусто-'
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    """Админ панель для модели Favorite."""
+
+    list_display = ['user', 'recipe']
+    search_fields = ['user__username', 'user__email']
+    empty_value_display = '-пусто-'
+
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    """Админ панель для модели ShoppingCart."""
+
+    list_display = ['user', 'recipe']
+    search_fields = ['user__username', 'user__email']
+    empty_value_display = '-пусто-'
+

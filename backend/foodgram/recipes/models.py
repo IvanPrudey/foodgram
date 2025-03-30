@@ -137,3 +137,76 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeTag(models.Model):
+    """Связь тега и рецепта."""
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт'
+    )
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.CASCADE,
+        verbose_name='Тег'
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['recipe', 'tag'],
+                name='recipe_tag_unique'
+            )
+        ]
+
+
+class ShoppingCart(models.Model):
+    """Корзина ."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='shopping_cart',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        related_name='shopping_cart',
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='user_shoppingcart_unique'
+            )
+        ]
+
+
+class Favorite(models.Model):
+    """Избранные рецепты."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='favorites',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        related_name='favorites',
+    )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='user_favorite_unique'
+            )
+        ]
