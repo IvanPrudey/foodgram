@@ -1,6 +1,7 @@
 venv
 .git
 db.sqlite3
+.sqlite3
 .idea
 .vscode
 .env
