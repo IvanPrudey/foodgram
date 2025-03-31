@@ -10,6 +10,7 @@ django-filter==24.3
 djangorestframework==3.15.2
 djangorestframework_simplejwt==5.4.0
 djoser==2.3.1
+drf-extra-fields==3.7.0
 idna==3.10
 oauthlib==3.2.2
 pillow==11.1.0
