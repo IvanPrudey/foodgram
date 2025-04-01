@@ -103,16 +103,16 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = ['user', 'author']
+        fields = ['user', 'subscribed_to']
         validators = [
             UniqueTogetherValidator(
                 queryset=Subscription.objects.all(),
-                fields=['user', 'author'],
+                fields=['user', 'subscribed_to'],
             )
         ]
 
     def to_representation(self, instance):
-        return ShowSubscriptionsSerializer(instance.author, context={
+        return ShowSubscriptionsSerializer(instance.subscribed_to, context={
             'request': self.context.get('request')
         }).data
 
@@ -146,7 +146,7 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
         if request is None or request.user.is_anonymous:
             return False
         return Subscription.objects.filter(
-            user=request.user, author=obj).exists()
+            user=request.user, subscribed_to=obj).exists()
 
     def get_recipes(self, obj):
         """Возвращает рецепты автора с возможностью ограничения количества."""

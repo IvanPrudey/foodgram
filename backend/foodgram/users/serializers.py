@@ -48,7 +48,7 @@ class CustomUserSerializer(UserSerializer):
             return False
         return Subscription.objects.filter(
             user=request.user,
-            author=obj
+            subscribed_to=obj
         ).exists()
 
 
