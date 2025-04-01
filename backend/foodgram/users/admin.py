@@ -13,11 +13,10 @@ class UserAdmin(admin.ModelAdmin):
         'email',
         'first_name',
         'last_name',
-        'role',
         'avatar'
     )
     list_filter = ('email', 'username')
-    search_fields = ('role', 'username')
+    search_fields = ('username',)
     ordering = ('username',)
 
     class Meta:
