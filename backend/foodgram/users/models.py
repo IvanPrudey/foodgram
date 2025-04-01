@@ -13,7 +13,6 @@ class User(AbstractUser):
         verbose_name='Пользователь',
         max_length=LONG_TEXT,
         unique=True,
-        blank=False,
         validators=(validate_username, validate_username_me,),
         help_text=(
             'Поле обязательно к заполнению.'
@@ -47,6 +46,8 @@ class User(AbstractUser):
         default=None,
         help_text='Загрузите фото профиля'
     )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         ordering = ('-id',)
