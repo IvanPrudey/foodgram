@@ -31,7 +31,7 @@ urlpatterns = [
         ShowSubscriptionsView.as_view(),
         name='subscriptions'
     ),
-    path('v1/', include(router_version_1.urls)),
-    path('v1/', include('djoser.urls')),
-    path('v1/auth/', include('djoser.urls.authtoken')),
+    path('', include(router_version_1.urls)),
+    path('', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
 ]
