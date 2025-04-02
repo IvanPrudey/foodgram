@@ -38,7 +38,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = IsAdminOrReadOnly
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = None
     filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
@@ -48,7 +48,7 @@ class RecipeViewSet(ModelViewSet):
     """Представление рецептов."""
 
     queryset = Recipe.objects.all()
-    permission_classes = IsAdminAuthorOrReadOnly
+    permission_classes = [IsAdminAuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
 
     def get_serializer_class(self):
@@ -125,18 +125,18 @@ class TagViewSet(ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = IsAdminOrReadOnly
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class SubscribeView(APIView):
     """Представление для подписки и отписки на авторов."""
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
         subscription_data = {
             'user': request.user.id,
-            'author': id
+            'subscribed_to': id
         }
 
         serializer = SubscriptionSerializer(
@@ -154,10 +154,10 @@ class SubscribeView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
-        author = get_object_or_404(User, id=id)
+        subscribed_to = get_object_or_404(User, id=id)
         subscription_exists = Subscription.objects.filter(
             user=request.user,
-            author=author
+            subscribed_to=subscribed_to
         ).exists()
 
         if not subscription_exists:
@@ -169,7 +169,7 @@ class SubscribeView(APIView):
         subscription = get_object_or_404(
             Subscription,
             user=request.user,
-            author=author
+            subscribed_to=subscribed_to
         )
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -181,8 +181,8 @@ class ShowSubscriptionsView(ListAPIView):
     на которых подписан текущий пользователь.
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
     serializer_class = ShowSubscriptionsSerializer
 
     def get_queryset(self):
-        return User.objects.filter(author__user=self.request.user)
+        return User.objects.filter(subscribed_to__user=self.request.user)
