@@ -51,9 +51,8 @@ class Tag(models.Model):
         verbose_name='Цвет в формате HEX'
     )
     slug = models.SlugField(
-        'Slug',
         max_length=200,
-        verbose_name='Уникальный слаг',
+        verbose_name='Slug',
         unique=True
     )
 
