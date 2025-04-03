@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import CheckConstraint, Q, UniqueConstraint
+from django.db.models import UniqueConstraint
 
 from users.constants import LONG_TEXT, MAX_SIZE_EMAIL
 from users.validators import validate_username, validate_username_me
@@ -25,8 +25,7 @@ class User(AbstractUser):
     email = models.EmailField(
         verbose_name='Электронная почта',
         max_length=MAX_SIZE_EMAIL,
-        unique=True,
-        blank=False
+        unique=True
     )
     first_name = models.CharField(
         verbose_name='Имя',
@@ -35,14 +34,6 @@ class User(AbstractUser):
     last_name = models.CharField(
         verbose_name='Фамилия',
         max_length=LONG_TEXT,
-    )
-    avatar = models.ImageField(
-        upload_to='users/avatars',
-        verbose_name='Фото профиля',
-        null=True,
-        blank=True,
-        default=None,
-        help_text='Загрузите фото профиля'
     )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
@@ -87,10 +78,6 @@ class Subscription(models.Model):
                 fields=['user', 'subscribed_to'],
                 name='unique_user_subscription'
             ),
-            CheckConstraint(
-                check=~Q(user=models.F('subscribed_to')),
-                name='no_self_subscription'
-            )
         ]
 
     def __str__(self):

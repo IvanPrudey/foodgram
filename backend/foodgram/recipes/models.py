@@ -25,6 +25,12 @@ class Ingredient(models.Model):
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='ingredient_name_unit_unique'
+            )
+        ]
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
@@ -45,6 +51,7 @@ class Tag(models.Model):
         verbose_name='Цвет в формате HEX'
     )
     slug = models.SlugField(
+        'Slug',
         max_length=200,
         verbose_name='Уникальный слаг',
         unique=True
@@ -70,7 +77,6 @@ class Recipe(models.Model):
     name = models.CharField(
         verbose_name='Название рецепта',
         max_length=256,
-        db_index=True
     )
     image = models.ImageField(
         blank=True,
@@ -87,7 +93,8 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='recipes',
+        through='RecipeTag',
+        related_name='tags',
         verbose_name='Теги'
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -136,7 +143,7 @@ class IngredientInRecipe(models.Model):
         default_related_name = 'ingridients_recipe'
         constraints = [
             UniqueConstraint(
-                fields=('ingredient', 'amount'),
+                fields=('recipe', 'ingredient'),
                 name='unique_ingredient_in_recipe'),
         ]
         verbose_name = 'Ингредиент в рецепте'
