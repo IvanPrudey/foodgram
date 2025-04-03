@@ -31,12 +31,10 @@ class User(AbstractUser):
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=LONG_TEXT,
-        blank=False
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
         max_length=LONG_TEXT,
-        blank=False
     )
     avatar = models.ImageField(
         upload_to='users/avatars',

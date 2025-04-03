@@ -32,7 +32,7 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
     """Тег."""
-    
+
     name = models.CharField(
         max_length=200,
         verbose_name='Название тега',
@@ -82,7 +82,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='RecipeIngredient',
+        through='IngredientInRecipe',
         verbose_name='Ингредиенты  в рецепте'
     )
     tags = models.ManyToManyField(
