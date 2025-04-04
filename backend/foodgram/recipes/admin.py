@@ -33,10 +33,13 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     """Админ панель для модели Tag."""
 
-    list_display = ('name', 'color', 'slug')
+    list_display = ('id', 'name', 'color', 'slug')
+    list_display_links = ('name', 'slug')
     search_fields = ('name', 'slug')
     list_filter = ('color',)
     empty_value_display = '-пусто-'
+    prepopulated_fields = {'slug': ('name',)}
+    ordering = ('name',)
 
 
 @admin.register(Recipe)
@@ -46,6 +49,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'author', 'cooking_time', 'pub_date'
     )
+    list_display_links = ('name', 'author')
     search_fields = ('name', 'author__username', 'tags__name')
     list_filter = ('author', 'tags', 'pub_date')
     filter_horizontal = ('ingredients', 'tags')
@@ -56,8 +60,8 @@ class RecipeAdmin(admin.ModelAdmin):
 class FavoriteAdmin(admin.ModelAdmin):
     """Админ панель для модели Favorite."""
 
-    list_display = ['user', 'recipe']
-    search_fields = ['user__username', 'user__email']
+    list_display = ['user', 'recipe', 'created_at']
+    list_display_links = ('user', 'recipe')
     empty_value_display = '-пусто-'
 
 
@@ -66,5 +70,5 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     """Админ панель для модели ShoppingCart."""
 
     list_display = ['user', 'recipe']
-    search_fields = ['user__username', 'user__email']
+    list_display_links = ['user', 'recipe']
     empty_value_display = '-пусто-'
