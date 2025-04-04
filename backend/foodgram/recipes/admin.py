@@ -55,6 +55,14 @@ class RecipeAdmin(admin.ModelAdmin):
     filter_horizontal = ('ingredients', 'tags')
     empty_value_display = '-пусто-'
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related('author')
+            .prefetch_related('tags', 'ingredients')
+        )
+
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):

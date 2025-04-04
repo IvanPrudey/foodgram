@@ -14,24 +14,24 @@ from users.views import CustomUserViewSet
 app_name = 'api'
 
 router_version_1 = DefaultRouter()
-router_version_1.register(r'users', CustomUserViewSet, basename='user')
+router_version_1.register(r'users', CustomUserViewSet, basename='users')
 router_version_1.register(
-    r'ingredients', IngredientViewSet, basename='ingredient'
+    r'ingredients', IngredientViewSet, basename='ingredients'
 )
-router_version_1.register(r'tags', TagViewSet, basename='tag')
-router_version_1.register(r'recipes', RecipeViewSet, basename='recipe')
+router_version_1.register(r'tags', TagViewSet, basename='tags')
+router_version_1.register(r'recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
-    path(
-        'users/<int:id>/subscribe/',
-        SubscribeView.as_view(),
-        name='subscribe'
-    ),
-    path(
-        'users/subscriptions/',
-        ShowSubscriptionsView.as_view(),
-        name='subscriptions'
-    ),
+    # path(
+    #     'users/<int:id>/subscribe/',
+    #     SubscribeView.as_view(),
+    #     name='subscribe'
+    # ),
+    # path(
+    #     'users/subscriptions/',
+    #     ShowSubscriptionsView.as_view(),
+    #     name='subscriptions'
+    # ),
     path(
         'recipes/<int:pk>/short-url/',
         short_url,

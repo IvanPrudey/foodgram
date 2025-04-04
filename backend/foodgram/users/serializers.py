@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
-from users.models import User, Subscription
+from users.models import User
 
 User = get_user_model()
 
@@ -45,7 +45,7 @@ class CustomUserSerializer(UserSerializer):
     о пользователе с проверкой подписки.
     """
 
-    is_subscribed = serializers.SerializerMethodField(read_only=True)
+    is_subscribed = serializers.SerializerMethodField()
     avatar = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -65,10 +65,7 @@ class CustomUserSerializer(UserSerializer):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        return Subscription.objects.filter(
-            user=request.user,
-            subscribed_to=obj
-        ).exists()
+        return request.user.subscriptions.filter(subscribed_to=obj).exists()
 
 
 class AvatarSerializer(serializers.ModelSerializer):
