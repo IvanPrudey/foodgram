@@ -6,6 +6,7 @@ from api.views import (
     RecipeViewSet,
     SubscribeView,
     ShowSubscriptionsView,
+    short_url,
     TagViewSet
 )
 from users.views import CustomUserViewSet
@@ -13,12 +14,12 @@ from users.views import CustomUserViewSet
 app_name = 'api'
 
 router_version_1 = DefaultRouter()
-router_version_1.register(r'users', CustomUserViewSet, basename='users')
+router_version_1.register(r'users', CustomUserViewSet, basename='user')
 router_version_1.register(
-    r'ingredients', IngredientViewSet, basename='ingredients'
+    r'ingredients', IngredientViewSet, basename='ingredient'
 )
-router_version_1.register(r'tags', TagViewSet, basename='tags')
-router_version_1.register(r'recipes', RecipeViewSet, basename='recipes')
+router_version_1.register(r'tags', TagViewSet, basename='tag')
+router_version_1.register(r'recipes', RecipeViewSet, basename='recipe')
 
 urlpatterns = [
     path(
@@ -30,6 +31,11 @@ urlpatterns = [
         'users/subscriptions/',
         ShowSubscriptionsView.as_view(),
         name='subscriptions'
+    ),
+    path(
+        'recipes/<int:pk>/short-url/',
+        short_url,
+        name='short_url'
     ),
     path('', include(router_version_1.urls)),
     path('', include('djoser.urls')),

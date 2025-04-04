@@ -25,7 +25,8 @@ class User(AbstractUser):
     email = models.EmailField(
         verbose_name='Электронная почта',
         max_length=MAX_SIZE_EMAIL,
-        unique=True
+        unique=True,
+        db_index=True
     )
     first_name = models.CharField(
         verbose_name='Имя',
@@ -35,11 +36,16 @@ class User(AbstractUser):
         verbose_name='Фамилия',
         max_length=LONG_TEXT,
     )
+    avatar = models.ImageField(
+        'Аватар',
+        upload_to='avatars/',
+        blank=True,
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
-        ordering = ('-pk',)
+        ordering = ('username',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -72,7 +78,7 @@ class Subscription(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        ordering = ['-id']
+        ordering = ('user', 'subscribed_to')
         constraints = [
             UniqueConstraint(
                 fields=['user', 'subscribed_to'],
