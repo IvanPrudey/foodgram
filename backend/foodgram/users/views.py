@@ -1,14 +1,24 @@
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404, redirect
 from djoser.views import UserViewSet
+from django.views.decorators.http import require_GET
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from api.pagination import CustomPagination
-from api.serializers import SubscriptionSerializer
 from users.models import User, Subscription
 from users.serializers import CustomUserSerializer
+
+User = get_user_model()
+
+
+@require_GET
+def short_url(request, pk):
+    url = reverse('recipes', args=[pk])
+    return redirect(url)
 
 
 class CustomUserViewSet(UserViewSet):

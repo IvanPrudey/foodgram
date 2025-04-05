@@ -4,8 +4,8 @@ from rest_framework.routers import DefaultRouter
 from api.views import (
     IngredientViewSet,
     RecipeViewSet,
-    SubscribeView,
-    ShowSubscriptionsView,
+    # SubscribeView,
+    # ShowSubscriptionsView,
     short_url,
     TagViewSet
 )
