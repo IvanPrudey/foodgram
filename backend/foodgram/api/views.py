@@ -6,14 +6,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from api.pagination import CustomPagination
-from api.permissions import IsAdminAuthorOrReadOnly, IsAdminOrReadOnly
+from api.permissions import IsAdminAuthorOrReadOnly
 from api.serializers import (
     CreateRecipeSerializer,
     IngredientSerializer,
@@ -35,10 +34,10 @@ from recipes.models import (
 from users.models import Subscription, User
 
 
-@require_GET
-def short_url(request, pk):
-    url = reverse('recipes', args=[pk])
-    return redirect(url)
+# @require_GET
+# def short_url(request, pk):
+#     url = reverse('recipes', args=[pk])
+#     return redirect(url)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -48,8 +47,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
     pagination_class = None
-    filter_backends = (IngredientFilter,)
-    search_fields = ('^name',)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(ModelViewSet):
@@ -167,51 +166,52 @@ class TagViewSet(ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrAuthorOrReadOnly]
+    pagination_class = None
 
 
-class SubscribeView(APIView):
-    """Представление для подписки и отписки на авторов."""
+# class SubscribeView(APIView):
+#     """Представление для подписки и отписки на авторов."""
 
-    permission_classes = [IsAuthenticated]
+#     permission_classes = [IsAuthenticated]
 
-    def post(self, request, id):
-        subscription_data = {
-            'user': request.user.id,
-            'subscribed_to': id
-        }
+#     def post(self, request, id):
+#         subscription_data = {
+#             'user': request.user.id,
+#             'subscribed_to': id
+#         }
 
-        serializer = SubscriptionSerializer(
-            data=subscription_data,
-            context={'request': request}
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+#         serializer = SubscriptionSerializer(
+#             data=subscription_data,
+#             context={'request': request}
+#         )
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, id):
-        subscribe_to = get_object_or_404(User, id=id)
-        if Subscription.objects.filter(
-           user=request.user, subscribe_to=subscribe_to).exists():
-            subscription = get_object_or_404(
-                Subscription, user=request.user, subscribe_to=subscribe_to
-            )
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+#     def delete(self, request, id):
+#         subscribe_to = get_object_or_404(User, id=id)
+#         if Subscription.objects.filter(
+#            user=request.user, subscribe_to=subscribe_to).exists():
+#             subscription = get_object_or_404(
+#                 Subscription, user=request.user, subscribe_to=subscribe_to
+#             )
+#             subscription.delete()
+#             return Response(status=status.HTTP_204_NO_CONTENT)
+#         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class ShowSubscriptionsView(ListAPIView):
-    """
-    API для получения списка авторов,
-    на которых подписан текущий пользователь.
-    """
+# class ShowSubscriptionsView(ListAPIView):
+#     """
+#     API для получения списка авторов,
+#     на которых подписан текущий пользователь.
+#     """
 
-    permission_classes = [IsAuthenticated]
-    serializer_class = ShowSubscriptionsSerializer
-    pagination_class = CustomPagination
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = ShowSubscriptionsSerializer
+#     pagination_class = CustomPagination
 
-    def get_queryset(self):
-        user = self.request.user
-        return User.objects.filter(subscribed_to__user=user)
+#     def get_queryset(self):
+#         user = self.request.user
+#         return User.objects.filter(subscribed_to__user=user)

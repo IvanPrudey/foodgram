@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from djoser.views import UserViewSet
 from django.views.decorators.http import require_GET
@@ -10,9 +11,9 @@ from rest_framework.reverse import reverse
 
 from api.pagination import CustomPagination
 from api.permissions import IsAdminOrAuthorOrReadOnly
-from api.serializers import FollowReadSerializer
+from api.serializers import FollowCreateSerializer, FollowReadSerializer
 from users.models import User, Subscription
-from users.serializers import CustomUserSerializer
+from users.serializers import AvatarSerializer, CustomUserSerializer
 
 
 User = get_user_model()
@@ -69,20 +70,17 @@ class CustomUserViewSet(UserViewSet):
     )
     def subscribe(self, request, id):
         user = request.user
-
         if request.method == 'POST':
-            subscribed_user = get_object_or_404(User, id=id)
+            subscribed_to = get_object_or_404(User, id=id)
             serializer = FollowCreateSerializer(
                 context={'request': request},
                 data={
-                    'subscribed_user': subscribed_user.id,
+                    'subscribed_to': subscribed_to.id,
                     'user': user.id
                 }
             )
-
             serializer.is_valid(raise_exception=True)
             serializer.save()
-
             author_annotated = User.objects.annotate(
                 recipes_count=Count('recipes')
             ).filter(id=id).first()
@@ -90,17 +88,15 @@ class CustomUserViewSet(UserViewSet):
                 author_annotated,
                 context={'request': request}
             )
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             deleted_count, _ = Subscription.objects.filter(
-                user=user, subscribed_user_id=id
+                user=user, subscribed_to_id=id
             ).delete()
 
             if deleted_count:
                 return Response(status=status.HTTP_204_NO_CONTENT)
-
             return Response(
                 {'detail': 'Вы не подписаны на данного пользователя!'},
                 status=status.HTTP_404_NOT_FOUND
