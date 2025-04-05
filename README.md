@@ -47,6 +47,29 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt 
 ```
 
+Перейти в директорию с файлом manage.py: 
+```
+/backend/foodgram
+```
+
+Создать и применить миграции: 
+```
+python manage.py makemigrations
+python manage.py migrate
+
+```
+
+Загрузить данные ингредиентов из файла CSV с помощью скрипта: 
+```
+python manage.py load_data_script
+```
+
+Создать суперпользователя: 
+```
+python manage.py createsuperuser
+```
+-------------
+
 Установить значения констант для доступа к БД в файле .env
 ```
 POSTGRES_DB=<имя базы данных>

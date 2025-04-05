@@ -196,14 +196,18 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с избранными рецептами."""
 
+    user = serializers.ReadOnlyField(source='user.id')
+    recipe = serializers.ReadOnlyField(source='recipe.id')
+
     class Meta:
         model = Favorite
         fields = ['user', 'recipe']
 
     def to_representation(self, instance):
-        return ShowFavoriteSerializer(instance.recipe, context={
-            'request': self.context.get('request')
-        }).data
+        return ShortRecipeSerializer(
+            instance.recipe,
+            context={'request': self.context.get('request')}
+        ).data
 
 
 class AddIngredientRecipeSerializer(serializers.ModelSerializer):
@@ -326,3 +330,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         instance.ingredients.clear()
         recipe = super().update(instance, validated_data)
         return self.create_or_update_obj(recipe, tags, ingredients)
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
