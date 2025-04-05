@@ -9,8 +9,11 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from api.pagination import CustomPagination
+from api.permissions import IsAdminOrAuthorOrReadOnly
+from api.serializers import FollowReadSerializer
 from users.models import User, Subscription
 from users.serializers import CustomUserSerializer
+
 
 User = get_user_model()
 
@@ -31,48 +34,92 @@ class CustomUserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
     pagination_class = CustomPagination
 
-    @staticmethod
-    def process_subscription(request, author):
-        """Вспомогательный метод для обработки логики создания подписки."""
-        user = request.user
-        if not Subscription.objects.filter(user=user, author=author).exists():
-            serializer = SubscriptionSerializer(
-                data={'user': user.id, 'author': author.id},
-                context={'request': request}
+    def get_permissions(self):
+        if self.action == 'me':
+            return [
+                IsAuthenticated(),
+            ]
+        return super().get_permissions()
+
+    @action(
+        methods=['PUT', 'DELETE'],
+        detail=False,
+        permission_classes=[IsAuthenticated, IsAdminOrAuthorOrReadOnly],
+        url_path='me/avatar',
+    )
+    def avatar_put_delete(self, request, *args, **kwargs):
+        if self.request.method == 'PUT':
+            serializer = AvatarSerializer(
+                instance=request.user,
+                data=request.data,
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(
-            {'detail': 'Подписка уже существует.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data)
+
+        elif self.request.method == 'DELETE':
+            user = self.request.user
+            user.avatar.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        detail=True, methods=['POST'], permission_classes=[IsAuthenticated]
+        detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=[IsAuthenticated],
     )
-    def subscribe(self, request, **kwargs):
-        """Подписать текущего пользователя на автора."""
-        author = get_object_or_404(User, id=self.kwargs.get('id'))
-        return self.process_subscription(request, author)
-
-    @subscribe.mapping.delete
-    def unsubscribe(self, request, **kwargs):
-        """Отписать текущего пользователя от автора."""
-        author = get_object_or_404(User, id=self.kwargs.get('id'))
-        subscription = get_object_or_404(
-            Subscription, user=request.user, author=author
-        )
-        subscription.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=False, permission_classes=[IsAuthenticated])
-    def subscriptions(self, request):
-        """Cписок авторов, на которых подписан текущий пользователь."""
+    def subscribe(self, request, id):
         user = request.user
-        queryset = User.objects.filter(subscribing__user=user)
+
+        if request.method == 'POST':
+            subscribed_user = get_object_or_404(User, id=id)
+            serializer = FollowCreateSerializer(
+                context={'request': request},
+                data={
+                    'subscribed_user': subscribed_user.id,
+                    'user': user.id
+                }
+            )
+
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            author_annotated = User.objects.annotate(
+                recipes_count=Count('recipes')
+            ).filter(id=id).first()
+            serializer = FollowReadSerializer(
+                author_annotated,
+                context={'request': request}
+            )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            deleted_count, _ = Subscription.objects.filter(
+                user=user, subscribed_user_id=id
+            ).delete()
+
+            if deleted_count:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+            return Response(
+                {'detail': 'Вы не подписаны на данного пользователя!'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=[IsAuthenticated],
+        url_name='subscriptions',
+        url_path='subscriptions',
+    )
+    def get_subscriptions(self, request):
+        user = request.user
+        queryset = User.objects.filter(subscribers__user=user).annotate(
+            recipes_count=Count('recipes')
+        )
         pages = self.paginate_queryset(queryset)
-        serializer = SubscriptionSerializer(
+        serializer = FollowReadSerializer(
             pages, many=True, context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
