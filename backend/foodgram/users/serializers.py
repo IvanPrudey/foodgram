@@ -59,6 +59,7 @@ class CustomUserSerializer(UserSerializer):
             'is_subscribed',
             'avatar',
         ]
+        read_only_fields = ['id', 'is_subscribed']
 
     def get_is_subscribed(self, obj):
         """Проверка наличия подписки."""
