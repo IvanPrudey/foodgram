@@ -39,29 +39,6 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
 
 
-class IngredientInRecipeSerializer(serializers.ModelSerializer):
-    """Отображение модели, связывающей ингредиенты и рецепт."""
-
-    id = serializers.IntegerField(source='ingredient.id', read_only=True)
-    name = serializers.CharField(source='ingredient.name', read_only=True)
-    measurement_unit = serializers.CharField(
-        source='ingredient.measurement_unit',
-        read_only=True
-    )
-
-    class Meta:
-        model = IngredientInRecipe
-        fields = ['id', 'name', 'amount', 'measurement_unit']
-
-
-class ShowFavoriteSerializer(serializers.ModelSerializer):
-    """Отображение избранного."""
-
-    class Meta:
-        model = Recipe
-        fields = ['id', 'name', 'image', 'cooking_time']
-
-
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с избранными рецептами."""
 
@@ -84,15 +61,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
     class Meta(FavoriteSerializer.Meta):
         model = ShoppingCart
-
-
-class CreateRecipeSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для создания и обновления рецептов.
-    Обрабатывает данные рецепта, включая ингредиенты, теги и изображение.
-    """
-
-    pass
 
 
 class FollowCreateSerializer(serializers.ModelSerializer):

@@ -79,7 +79,6 @@ class Recipe(models.Model):
         max_length=256,
     )
     image = models.ImageField(
-        blank=True,
         verbose_name='Изображение',
         upload_to='recipes/images'
     )
@@ -109,13 +108,9 @@ class Recipe(models.Model):
         related_name='favorite_recipes',
         blank=True,
     )
-    pub_date = models.DateTimeField(
-        verbose_name='Дата публикации',
-        auto_now_add=True
-    )
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ('name',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -151,36 +146,12 @@ class IngredientInRecipe(models.Model):
     )
 
     class Meta:
-        default_related_name = 'ingridients_recipe'
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
         ordering = ['ingredient__name']
 
     def __str__(self):
         return f'{self.ingredient} – {self.amount}'
-
-
-# class RecipeTag(models.Model):
-#     """Связь тега и рецепта."""
-
-#     recipe = models.ForeignKey(
-#         Recipe,
-#         on_delete=models.CASCADE,
-#         verbose_name='Рецепт'
-#     )
-#     tag = models.ForeignKey(
-#         Tag,
-#         on_delete=models.CASCADE,
-#         verbose_name='Тег'
-#     )
-
-#     class Meta:
-#         constraints = [
-#             UniqueConstraint(
-#                 fields=['recipe', 'tag'],
-#                 name='recipe_tag_unique'
-#             )
-#         ]
 
 
 class ShoppingCart(models.Model):
@@ -203,7 +174,7 @@ class ShoppingCart(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='user_shoppingcart_unique'
+                name='unique_user_recipe_in_cart'
             )
         ]
         ordering = ['user', 'recipe']
@@ -229,7 +200,7 @@ class Favorite(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
-        related_name='favorites',
+        related_name='favorited_by',
     )
     created_at = models.DateTimeField('Дата добавления', auto_now_add=True)
 
@@ -237,7 +208,7 @@ class Favorite(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='user_favorite_unique'
+                name='unique_favorite'
             )
         ]
         ordering = ['-created_at']

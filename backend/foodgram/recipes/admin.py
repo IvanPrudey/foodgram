@@ -47,11 +47,11 @@ class RecipeAdmin(admin.ModelAdmin):
     """Админ панель для модели Recipe."""
 
     list_display = (
-        'name', 'author', 'cooking_time', 'pub_date'
+        'name', 'author', 'cooking_time'
     )
     list_display_links = ('name', 'author')
     search_fields = ('name', 'author__username', 'tags__name')
-    list_filter = ('author', 'tags', 'pub_date')
+    list_filter = ('author', 'tags')
     filter_horizontal = ('ingredients', 'tags')
     empty_value_display = '-пусто-'
 
