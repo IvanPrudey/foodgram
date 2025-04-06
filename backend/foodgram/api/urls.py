@@ -4,8 +4,6 @@ from rest_framework.routers import DefaultRouter
 from api.views import (
     IngredientViewSet,
     RecipeViewSet,
-    # SubscribeView,
-    # ShowSubscriptionsView,
     short_url,
     TagViewSet
 )
@@ -22,16 +20,6 @@ router_version_1.register(r'tags', TagViewSet, basename='tags')
 router_version_1.register(r'recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
-    # path(
-    #     'users/<int:id>/subscribe/',
-    #     SubscribeView.as_view(),
-    #     name='subscribe'
-    # ),
-    # path(
-    #     'users/subscriptions/',
-    #     ShowSubscriptionsView.as_view(),
-    #     name='subscriptions'
-    # ),
     path(
         'recipes/<int:pk>/short-url/',
         short_url,
