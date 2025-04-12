@@ -116,7 +116,7 @@ class FollowReadSerializer(serializers.ModelSerializer):
         if not request or not request.user.is_authenticated:
             return False
         return Subscription.objects.filter(
-            subscribed_to=obj, 
+            subscribed_to=obj,
             user=request.user
         ).exists()
 
