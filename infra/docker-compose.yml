@@ -14,7 +14,7 @@ services:
       - ./.env
 
   backend:
-    image: /foodgram_backend:latest
+    image: ivpru/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/backend_static
@@ -25,7 +25,7 @@ services:
       - ./.env
 
   frontend:
-    image: /foodgram_frontend:latest
+    image: ivpru/foodgram_frontend:latest
     volumes:
       - static_value:/app/result_build/build/
     depends_on:
