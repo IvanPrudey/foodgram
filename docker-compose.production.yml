@@ -1,0 +1,47 @@
+version: '3.3'
+
+volumes:
+  postgres_data:
+  static_value:
+  media_value:
+
+services:
+  db:
+    image: postgres:12.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    restart: always
+
+  backend:
+    image: ivpru/foodgram_backend:latest
+    restart: always
+    volumes:
+      - static_value:/backend_static
+      - media_value:/app/media/
+    depends_on:
+      - db
+    env_file:
+      - .env
+
+  frontend:
+    image: ivpru/foodgram_frontend:latest
+    volumes:
+      - static_value:/app/result_build/build/
+    depends_on:
+      - backend
+  
+  nginx:
+    image: nginx:1.22.1
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../docs/:/usr/share/nginx/html/api/docs/
+      - static_value:/static/
+      - media_value:/media/
+    restart: always
+    depends_on:
+      - frontend
+      - backend
