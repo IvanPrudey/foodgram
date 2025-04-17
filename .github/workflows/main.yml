@@ -109,7 +109,8 @@ jobs:
             sudo docker compose -f docker-compose.production.yml pull
             sudo docker compose -f docker-compose.production.yml down
             sudo docker compose -f docker-compose.production.yml up -d
-            sudo docker compose -f docker-compose.production.yml exec backend python backend/foodgram/manage.py migrate
+            sudo docker compose -f docker-compose.production.yml exec backend python foodgram/manage.py migrate
+
 
   send_message:
     runs-on: ubuntu-latest
