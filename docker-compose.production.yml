@@ -16,7 +16,6 @@ services:
 
   backend:
     image: ivpru/foodgram_backend:latest
-    # restart: always
     volumes:
       - static_value:/backend_static
       - media_value:/app/media/
