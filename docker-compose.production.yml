@@ -32,12 +32,10 @@ services:
       - backend
 
   nginx:
-    image: nginx:1.22.1
+    image: ivpru/foodgram_gateway:latest
     ports:
       - 8080:80
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ../docs/:/usr/share/nginx/html/api/docs/
       - static_value:/static/
       - media_value:/media/
     restart: always
