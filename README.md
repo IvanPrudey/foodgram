@@ -28,7 +28,7 @@ GitHub Actions
 git clone https://github.com/IvanPrudey/foodgram.git 
 ``` 
 ``` 
-cd foodgram 
+cd foodgram/backend
 ``` 
 
 Cоздать и активировать виртуальное окружение: 
