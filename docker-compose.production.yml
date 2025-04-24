@@ -37,7 +37,7 @@ services:
       - 8080:80
     volumes:
       - static_value:/static/
-      - media_value:/app/foodgram/media/
+      - media_value:/foodgram/media/
     restart: always
     depends_on:
       - frontend
