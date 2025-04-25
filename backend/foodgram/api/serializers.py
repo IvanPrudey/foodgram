@@ -36,7 +36,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'color', 'slug')
+        fields = ('id', 'name', 'slug')
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -302,21 +302,37 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             amount=F('in_recipes__amount'),
         )
 
-    def _check_user_status(self, obj, model_class):
-        """Проверяет, связан ли рецепт с пользователем"""
-        request = self.context.get('request')
+    # def _check_user_status(self, obj, model_class):
+    #     """Проверяет, связан ли рецепт с пользователем"""
+    #     request = self.context.get('request')
+    #     return (
+    #         request
+    #         and request.user.is_authenticated
+    #         and model_class.objects.filter(
+    #             recipe=obj, user=request.user
+    #         ).exists()
+    #     )
+
+    # def get_is_favorited(self, obj):
+    #     """Проверяет, находится ли рецепт в избранном у пользователя."""
+    #     return self._check_user_status(obj, Favorite)
+
+    # def get_is_in_shopping_cart(self, obj):
+    #     """Проверяет, находится ли рецепт в корзине у пользователя."""
+    #     return self._check_user_status(obj, ShoppingCart)
+    def check_user_status(self, obj, model_class):
+        user = self.context.get('request')
         return (
-            request
-            and request.user.is_authenticated
+            user
+            and user.user.is_authenticated
             and model_class.objects.filter(
-                recipe=obj, user=request.user
+                recipe=obj,
+                user=user.user
             ).exists()
         )
 
     def get_is_favorited(self, obj):
-        """Проверяет, находится ли рецепт в избранном у пользователя."""
-        return self._check_user_status(obj, Favorite)
+        return self.check_user_status(obj, Favorite)
 
     def get_is_in_shopping_cart(self, obj):
-        """Проверяет, находится ли рецепт в корзине у пользователя."""
-        return self._check_user_status(obj, ShoppingCart)
+        return self.check_user_status(obj, ShoppingCart)

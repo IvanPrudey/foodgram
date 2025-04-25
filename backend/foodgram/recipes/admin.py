@@ -33,10 +33,9 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     """Админ панель для модели Tag."""
 
-    list_display = ('id', 'name', 'color', 'slug')
+    list_display = ('id', 'name', 'slug')
     list_display_links = ('name', 'slug')
     search_fields = ('name', 'slug')
-    list_filter = ('color',)
     empty_value_display = '-пусто-'
     prepopulated_fields = {'slug': ('name',)}
     ordering = ('name',)

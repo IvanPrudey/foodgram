@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -30,6 +31,8 @@ from recipes.models import (
     Tag,
 )
 
+User = get_user_model()
+
 
 @require_GET
 def short_url(request, pk):
@@ -49,6 +52,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(ModelViewSet):
+    """Представление рецептов."""
+
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
