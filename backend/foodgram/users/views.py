@@ -89,10 +89,9 @@ class CustomUserViewSet(UserViewSet):
                 context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
+        else:
             deleted_count, _ = Subscription.objects.filter(
-                user=user, subscribed_to_id=id
+                user=user, subscribed_to__id=id
             ).delete()
 
             if deleted_count:

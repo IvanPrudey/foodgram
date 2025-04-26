@@ -302,37 +302,21 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             amount=F('in_recipes__amount'),
         )
 
-    # def _check_user_status(self, obj, model_class):
-    #     """Проверяет, связан ли рецепт с пользователем"""
-    #     request = self.context.get('request')
-    #     return (
-    #         request
-    #         and request.user.is_authenticated
-    #         and model_class.objects.filter(
-    #             recipe=obj, user=request.user
-    #         ).exists()
-    #     )
-
-    # def get_is_favorited(self, obj):
-    #     """Проверяет, находится ли рецепт в избранном у пользователя."""
-    #     return self._check_user_status(obj, Favorite)
-
-    # def get_is_in_shopping_cart(self, obj):
-    #     """Проверяет, находится ли рецепт в корзине у пользователя."""
-    #     return self._check_user_status(obj, ShoppingCart)
-    def check_user_status(self, obj, model_class):
-        user = self.context.get('request')
+    def _check_user_status(self, obj, model_class):
+        """Проверяет, связан ли рецепт с пользователем"""
+        request = self.context.get('request')
         return (
-            user
-            and user.user.is_authenticated
+            request
+            and request.user.is_authenticated
             and model_class.objects.filter(
-                recipe=obj,
-                user=user.user
+                recipe=obj, user=request.user
             ).exists()
         )
 
     def get_is_favorited(self, obj):
-        return self.check_user_status(obj, Favorite)
+        """Проверяет, находится ли рецепт в избранном у пользователя."""
+        return self._check_user_status(obj, Favorite)
 
     def get_is_in_shopping_cart(self, obj):
-        return self.check_user_status(obj, ShoppingCart)
+        """Проверяет, находится ли рецепт в корзине у пользователя."""
+        return self._check_user_status(obj, ShoppingCart)

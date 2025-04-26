@@ -94,11 +94,11 @@ class Recipe(models.Model):
         ],
         verbose_name='Время приготовления (в минутах)'
     )
-    favorited = models.ManyToManyField(
-        "Favorite",
-        related_name='favorite_recipes',
-        blank=True,
-    )
+    # favorited = models.ManyToManyField(
+    #     "Favorite",
+    #     related_name='favorite_recipes',
+    #     blank=True,
+    # )
 
     class Meta:
         ordering = ('-id',)
