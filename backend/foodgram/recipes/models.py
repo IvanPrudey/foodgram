@@ -94,9 +94,8 @@ class Recipe(models.Model):
         ],
         verbose_name='Время приготовления (в минутах)'
     )
-    favorite = models.ManyToManyField(
-        User,
-        through='Favorite',
+    favorited = models.ManyToManyField(
+        "Favorite",
         related_name='favorite_recipes',
         blank=True,
     )
