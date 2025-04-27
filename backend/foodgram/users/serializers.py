@@ -11,6 +11,8 @@ User = get_user_model()
 
 
 class Base64ImageField(serializers.ImageField):
+    """Для обработки изображений, преобразует строку base64 в файл."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
@@ -70,6 +72,11 @@ class CustomUserSerializer(UserSerializer):
 
 
 class AvatarSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для аватара пользователя,
+    поддерживающий загрузку в формате base64.
+    """
+
     avatar = Base64ImageField(allow_null=True)
 
     class Meta:

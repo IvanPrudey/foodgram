@@ -15,6 +15,7 @@ def validate_username_me(value):
 
 
 def validate_username(username):
+    """Проверяет username на соответствие паттерну."""
     pattern = r'^[\w.@+-]+\Z'
     if not re.match(pattern, username):
         raise ValidationError(
