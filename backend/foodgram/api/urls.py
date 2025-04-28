@@ -7,12 +7,12 @@ from api.views import (
     short_url,
     TagViewSet
 )
-from users.views import CustomUserViewSet
+from users.views import UserViewSet
 
 app_name = 'api'
 
 router_version_1 = DefaultRouter()
-router_version_1.register(r'users', CustomUserViewSet, basename='users')
+router_version_1.register(r'users', UserViewSet, basename='users')
 router_version_1.register(
     r'ingredients', IngredientViewSet, basename='ingredients'
 )

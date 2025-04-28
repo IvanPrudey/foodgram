@@ -12,7 +12,7 @@ from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import IngredientFilter, RecipeFilter
-from api.pagination import CustomPagination
+from api.pagination import Pagination
 from api.permissions import IsAdminOrAuthorOrReadOnly
 from api.serializers import (
     FavoriteSerializer,
@@ -56,7 +56,7 @@ class RecipeViewSet(ModelViewSet):
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
-    pagination_class = CustomPagination
+    pagination_class = Pagination
     permission_classes = [IsAdminOrAuthorOrReadOnly]
     queryset = Recipe.objects.select_related('author').prefetch_related(
         'ingredients', 'tags'

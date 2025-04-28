@@ -2,14 +2,14 @@ import re
 
 from django.core.exceptions import ValidationError
 
-from users.constants import PATTERN_MES
+from users.constants import PATTERN_MES, USERNAME_ME
 
 
 def validate_username_me(value):
     """Валидация: username != me."""
-    if value == 'me':
+    if value == USERNAME_ME:
         raise ValidationError(
-            ('Имя пользователя не может быть <me>.'),
+            (f'Имя пользователя не может быть {USERNAME_ME}.'),
             params={'value': value},
         )
 

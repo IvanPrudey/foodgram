@@ -13,7 +13,7 @@ from recipes.models import (
     Tag
 )
 from users.models import Subscription
-from users.serializers import CustomUserSerializer
+from users.serializers import UserSerializer
 
 
 VALIDATE_MSG_1 = 'Должно быть наличие хотя бы одного ингредиента!'
@@ -282,7 +282,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор для чтения рецепта с дополнительными полями."""
 
-    author = CustomUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()

@@ -9,11 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from api.pagination import CustomPagination
+from api.pagination import Pagination
 from api.permissions import IsAdminOrAuthorOrReadOnly
 from api.serializers import FollowCreateSerializer, FollowReadSerializer
 from users.models import Subscription
-from users.serializers import AvatarSerializer, CustomUserSerializer
+from users.serializers import AvatarSerializer, UserSerializer
 
 
 User = get_user_model()
@@ -25,15 +25,15 @@ def short_url(request, pk):
     return redirect(url)
 
 
-class CustomUserViewSet(UserViewSet):
+class UserViewSet(UserViewSet):
     """
     Кастомный ViewSet для пользователей,
     расширяющий стандартный UserViewSet функционалом подписок.
     """
 
     queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
-    pagination_class = CustomPagination
+    serializer_class = UserSerializer
+    pagination_class = Pagination
 
     def get_permissions(self):
         if self.action == 'me':

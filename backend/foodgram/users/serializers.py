@@ -5,6 +5,8 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
+from users.constants import LONG_TEXT
+
 User = get_user_model()
 
 
@@ -19,11 +21,11 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class UserCreateSerializer(UserCreateSerializer):
     """Сериализатор для создания пользователя."""
 
     password = serializers.CharField(
-        max_length=150,
+        max_length=LONG_TEXT,
         write_only=True
     )
 
@@ -39,7 +41,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         ]
 
 
-class CustomUserSerializer(UserSerializer):
+class UserSerializer(UserSerializer):
     """
     Сериализатор для отображения информации
     о пользователе с проверкой подписки.
