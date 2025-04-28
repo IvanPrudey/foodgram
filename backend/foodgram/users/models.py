@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import UniqueConstraint
 
 from users.constants import LONG_TEXT, MAX_SIZE_EMAIL
 from users.validators import validate_username, validate_username_me
@@ -9,11 +10,16 @@ from users.validators import validate_username, validate_username_me
 class User(AbstractUser):
     """Пользователь с расширенными полями."""
 
+    username_validator = UnicodeUsernameValidator()
     username = models.CharField(
         verbose_name='Пользователь',
         max_length=LONG_TEXT,
         unique=True,
-        validators=(validate_username, validate_username_me,),
+        validators=(
+            validate_username,
+            validate_username_me,
+            username_validator,
+        ),
         help_text=(
             'Поле обязательно к заполнению.'
             'Необходимо использовать только буквы и цифры.'
@@ -80,11 +86,26 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
         ordering = ('user', 'subscribed_to')
         constraints = [
-            UniqueConstraint(
+            models.UniqueConstraint(
                 fields=['user', 'subscribed_to'],
                 name='unique_user_subscription'
             ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('subscribed_to')),
+                name='prevent_self_subscription'
+            ),
         ]
+
+    def clean(self):
+        if self.user == self.subscribed_to:
+            raise ValidationError(
+                "Пользователь не может подписаться на самого себя."
+            )
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Подписка: {self.user} -> {self.subscribed_to}'

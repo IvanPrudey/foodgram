@@ -1,8 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import Group
 from django.db.models import Count
 
 from users.models import User, Subscription
+
+admin.site.unregister(Group)
 
 
 @admin.register(User)
