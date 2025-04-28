@@ -12,7 +12,7 @@ from rest_framework.reverse import reverse
 from api.pagination import CustomPagination
 from api.permissions import IsAdminOrAuthorOrReadOnly
 from api.serializers import FollowCreateSerializer, FollowReadSerializer
-from users.models import User, Subscription
+from users.models import Subscription
 from users.serializers import AvatarSerializer, CustomUserSerializer
 
 

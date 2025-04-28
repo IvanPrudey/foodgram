@@ -12,7 +12,7 @@ from recipes.models import (
     ShoppingCart,
     Tag
 )
-from users.models import User, Subscription
+from users.models import Subscription
 from users.serializers import CustomUserSerializer
 
 

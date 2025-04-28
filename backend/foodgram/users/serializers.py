@@ -5,8 +5,6 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
-from users.models import User
-
 User = get_user_model()
 
 
