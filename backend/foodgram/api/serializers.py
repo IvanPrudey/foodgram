@@ -179,8 +179,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         label='Ingredients',
     )
     image = Base64ImageField(
-        allow_null=True,
-        label='images'
+        allow_null=False,
+        label='images',
+        required=True
     )
 
     class Meta:
@@ -195,7 +196,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        """Валидация ингредиентов и тегов перед созданием/обновлением."""
+        """
+        Валидация ингредиентов,
+        тегов и изображения перед созданием/обновлением.
+        """
+        if 'image' not in self.initial_data or not self.initial_data['image']:
+            raise serializers.ValidationError({
+                'image': 'Поле изображения обязательно и не может быть пустым!'
+            })
         ingredients = self.initial_data.get('ingredients', [])
         if not ingredients:
             raise serializers.ValidationError({
@@ -205,7 +213,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         existing_ids = set(Ingredient.objects.filter(
             id__in=ingredients_ids
         ).values_list('id', flat=True))
-
+        if len(ingredients_ids) != len(set(ingredients_ids)):
+            raise serializers.ValidationError({
+                'ingredients': 'Ингредиенты не должны повторяться!'
+            })
         if missing_ids := ingredients_ids - existing_ids:
             raise serializers.ValidationError(
                 f'Ингредиент с id: {missing_ids} не существует!'
