@@ -5,9 +5,10 @@ from api.views import (
     IngredientViewSet,
     RecipeViewSet,
     short_url,
-    TagViewSet
+    TagViewSet,
+    UserViewSet
 )
-from users.views import UserViewSet
+
 
 app_name = 'api'
 

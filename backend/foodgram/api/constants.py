@@ -6,3 +6,6 @@ ING_MEAS_LENGTH = 64
 PAGE_SIZE = 6
 RECIPE_NAME_LENGTH = 256
 TAG_LENGTH = 200
+VALIDATE_MSG_1 = 'Должно быть наличие хотя бы одного ингредиента!'
+VALIDATE_MSG_2 = 'Ингредиенты должны быть уникальными!'
+VALIDATE_MSG_3 = 'Укажите положительное количество каждого ингредиента!'
