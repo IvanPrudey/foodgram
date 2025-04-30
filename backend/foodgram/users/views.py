@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from api.pagination import Pagination
+from api.pagination import SpecificPagination
 from api.permissions import IsAdminOrAuthorOrReadOnly
 from api.serializers import FollowCreateSerializer, FollowReadSerializer
 from users.models import Subscription
@@ -33,7 +33,7 @@ class UserViewSet(UserViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = Pagination
+    pagination_class = SpecificPagination
 
     def get_permissions(self):
         if self.action == 'me':

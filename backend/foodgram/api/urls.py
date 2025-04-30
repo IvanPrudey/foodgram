@@ -11,13 +11,13 @@ from users.views import UserViewSet
 
 app_name = 'api'
 
-router_version_1 = DefaultRouter()
-router_version_1.register(r'users', UserViewSet, basename='users')
-router_version_1.register(
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='users')
+router.register(
     r'ingredients', IngredientViewSet, basename='ingredients'
 )
-router_version_1.register(r'tags', TagViewSet, basename='tags')
-router_version_1.register(r'recipes', RecipeViewSet, basename='recipes')
+router.register(r'tags', TagViewSet, basename='tags')
+router.register(r'recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
     path(
@@ -25,7 +25,7 @@ urlpatterns = [
         short_url,
         name='short_url'
     ),
-    path('', include(router_version_1.urls)),
+    path('', include(router.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
 ]
