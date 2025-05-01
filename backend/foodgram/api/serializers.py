@@ -80,9 +80,12 @@ class UserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Проверка наличия подписки."""
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return request.user.subscriptions.filter(subscribed_to=obj).exists()
+        return (
+            not request.user.is_anonymous
+            and request.user.subscriptions.filter(
+                subscribed_to=obj
+            ).exists()
+        )
 
 
 class AvatarSerializer(serializers.ModelSerializer):

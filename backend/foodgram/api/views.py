@@ -199,13 +199,6 @@ class RecipeViewSet(ModelViewSet):
         url_path='get-link',
         url_name='get-link',
     )
-    # def get_link(self, request, pk=None):
-    #     short_link = self.request.build_absolute_uri()
-    #     short_link = short_link.split('/')
-    #     short_link.pop(-2)
-    #     short_link.pop(-4)
-    #     short_link = str.join('/', short_link)
-    #     return Response({'short-link': short_link}, status=status.HTTP_200_OK)
     def get_link(self, request, pk=None):
         view_name = self.request.resolver_match.view_name
         base_url = reverse(view_name, kwargs={'pk': pk})
