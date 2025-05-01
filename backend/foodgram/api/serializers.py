@@ -151,10 +151,10 @@ class FollowCreateSerializer(serializers.ModelSerializer):
         subscribed_to = data['subscribed_to']
         if user == subscribed_to:
             raise ValidationError('Невозможно подписаться на себя!')
-        if Subscription.objects.filter(
-            user=user, subscribed_to=subscribed_to
-        ).exists():
-            raise ValidationError('Вы уже подписаны на этого пользователя!')
+        if user.subscriptions.filter(subscribed_to=subscribed_to).exists():
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого пользователя!'
+            )
         return data
 
 

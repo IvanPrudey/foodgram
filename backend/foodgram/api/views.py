@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_GET
 from django_filters.rest_framework import DjangoFilterBackend
+from django.urls import reverse
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -198,12 +199,17 @@ class RecipeViewSet(ModelViewSet):
         url_path='get-link',
         url_name='get-link',
     )
+    # def get_link(self, request, pk=None):
+    #     short_link = self.request.build_absolute_uri()
+    #     short_link = short_link.split('/')
+    #     short_link.pop(-2)
+    #     short_link.pop(-4)
+    #     short_link = str.join('/', short_link)
+    #     return Response({'short-link': short_link}, status=status.HTTP_200_OK)
     def get_link(self, request, pk=None):
-        short_link = self.request.build_absolute_uri()
-        short_link = short_link.split('/')
-        short_link.pop(-2)
-        short_link.pop(-4)
-        short_link = str.join('/', short_link)
+        view_name = self.request.resolver_match.view_name
+        base_url = reverse(view_name, kwargs={'pk': pk})
+        short_link = self.request.build_absolute_uri(base_url)
         return Response({'short-link': short_link}, status=status.HTTP_200_OK)
 
     @action(
