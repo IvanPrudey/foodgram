@@ -66,25 +66,25 @@ class UserViewSet(UserViewSet):
         return super().get_permissions()
 
     @action(
-        methods=['PUT', 'DELETE'],
+        methods=['PUT'],
         detail=False,
         permission_classes=[IsAuthenticated, IsAdminOrAuthorOrReadOnly],
         url_path='me/avatar',
     )
-    def avatar_put_delete(self, request, *args, **kwargs):
-        if self.request.method == 'PUT':
-            serializer = AvatarSerializer(
-                instance=request.user,
-                data=request.data,
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+    def avatar_put(self, request, *args, **kwargs):
+        serializer = AvatarSerializer(
+            instance=request.user,
+            data=request.data,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
-        elif self.request.method == 'DELETE':
-            user = self.request.user
-            user.avatar.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+    @avatar_put.mapping.delete
+    def avatar_delete(self, request, *args, **kwargs):
+        user = self.request.user
+        user.avatar.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
@@ -112,17 +112,14 @@ class UserViewSet(UserViewSet):
                 context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            deleted_count, _ = Subscription.objects.filter(
-                user=user, subscribed_to__id=id
-            ).delete()
-
-            if deleted_count:
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response(
-                {'detail': 'Вы не подписаны на данного пользователя!'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        deleted_count, _ = Subscription.objects.filter(
+            user=user, subscribed_to__id=id).delete()
+        if deleted_count:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'detail': 'Вы не подписаны на данного пользователя!'},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
     @action(
         detail=False,
