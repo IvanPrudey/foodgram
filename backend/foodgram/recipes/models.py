@@ -75,7 +75,6 @@ class Recipe(models.Model):
 
     author = models.ForeignKey(
         User,
-        related_name='recipes',
         on_delete=models.CASCADE,
         verbose_name='Автор рецепта'
     )
@@ -93,12 +92,10 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientInRecipe',
-        verbose_name='Ингредиенты  в рецепте',
-        related_name='recipes',
+        verbose_name='Ингредиенты  в рецепте'
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='recipes',
         verbose_name='Теги'
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -114,6 +111,7 @@ class Recipe(models.Model):
         ordering = ('name',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        default_related_name = 'recipes'
 
     def __str__(self):
         return self.name
@@ -155,7 +153,23 @@ class IngredientInRecipe(models.Model):
         return f'{self.ingredient} – {self.amount}'
 
 
-class ShoppingCart(models.Model):
+class UserRecipeBaseModel(models.Model):
+    """Абстрактная базовая модель для рецептов, связанных с пользователем."""
+
+    created_at = models.DateTimeField('Дата добавления', auto_now_add=True)
+
+    class Meta:
+        abstract = True
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_user_recipe_%(class)s'
+            )
+        ]
+        ordering = ('-created_at',)
+
+
+class ShoppingCart(UserRecipeBaseModel):
     """Корзина ."""
 
     user = models.ForeignKey(
@@ -172,13 +186,6 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_user_recipe_in_cart'
-            )
-        ]
-        ordering = ('user', 'recipe')
         verbose_name = 'Рецепт в корзине'
         verbose_name_plural = 'Рецепты в корзине'
 
@@ -188,7 +195,7 @@ class ShoppingCart(models.Model):
         )
 
 
-class Favorite(models.Model):
+class Favorite(UserRecipeBaseModel):
     """Избранные рецепты."""
 
     user = models.ForeignKey(
@@ -203,16 +210,8 @@ class Favorite(models.Model):
         verbose_name='Рецепт',
         related_name='favorited_by',
     )
-    created_at = models.DateTimeField('Дата добавления', auto_now_add=True)
 
     class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite'
-            )
-        ]
-        ordering = ('-created_at',)
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
 
