@@ -41,17 +41,25 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = IngredientInRecipe
+    extra = 1
+    min_num = 1
+    validate_min = True
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     """Админ панель для модели Recipe."""
 
+    inlines = (RecipeIngredientInline,)
     list_display = (
         'name', 'author', 'cooking_time'
     )
     list_display_links = ('name', 'author')
     search_fields = ('name', 'author__username', 'tags__name')
     list_filter = ('author', 'tags')
-    filter_horizontal = ('ingredients', 'tags')
+    filter_horizontal = ('tags',)
     empty_value_display = '-пусто-'
 
     def get_queryset(self, request):
