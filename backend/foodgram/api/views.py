@@ -167,6 +167,42 @@ class RecipeViewSet(ModelViewSet):
             return RecipeReadSerializer
         return RecipeCreateSerializer
 
+    @staticmethod
+    def _add_relation(request, pk, model, serializer_class, relation_name):
+        user = request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+
+        if model.objects.filter(recipe=recipe, user=user).exists():
+            return Response(
+                {
+                    'detail': f'Рецепт "{recipe.name}" уже добавлен '
+                    f'в {relation_name}'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = serializer_class(
+            data={'recipe': recipe.id, 'user': user.id}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(recipe=recipe, user=user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @staticmethod
+    def _remove_relation(request, pk, model, relation_name):
+        user = request.user
+        deleted_count, _ = model.objects.filter(
+            recipe_id=pk, user=user
+        ).delete()
+
+        if deleted_count:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {'detail': f'Данного рецепта нет в {relation_name}!'},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
     @action(
         detail=False,
         methods=['GET'],
@@ -210,40 +246,11 @@ class RecipeViewSet(ModelViewSet):
         url_name='favorite',
     )
     def add_to_favorite(self, request, pk):
-        user = request.user
-
         if request.method == 'POST':
-            recipe = get_object_or_404(Recipe, pk=pk)
-
-            if Favorite.objects.filter(recipe=recipe, user=user).exists():
-                return Response(
-                    {
-                        'detail': (
-                            f'Рецепт "{recipe.name}" уже добавлен'
-                            f'в избранное'
-                        )
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            serializer = FavoriteSerializer(
-                data={'recipe': recipe.id, 'user': user.id}
+            return self._add_relation(
+                request, pk, Favorite, FavoriteSerializer, 'избранное'
             )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(recipe=recipe, user=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        deleted_objects_number, _ = Favorite.objects.filter(
-            recipe_id=pk, user=user
-        ).delete()
-
-        if deleted_objects_number:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(
-            {'detail': 'Такого рецепта нет в избранных!'},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+        return self._remove_relation(request, pk, Favorite, 'избранных')
 
     @action(
         detail=True,
@@ -253,37 +260,16 @@ class RecipeViewSet(ModelViewSet):
         url_name='shopping_cart',
     )
     def add_to_shopping_cart(self, request, pk):
-        user = request.user
-
         if request.method == 'POST':
-            recipe = get_object_or_404(Recipe, pk=pk)
-
-            if ShoppingCart.objects.filter(recipe=recipe, user=user).exists():
-                return Response(
-                    {
-                        'detail': f'Рецепт "{recipe.name}" уже добавлен '
-                        'в список покупок'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            serializer = ShoppingCartSerializer(
-                data={'recipe': recipe.id, 'user': user.id}
+            return self._add_relation(
+                request,
+                pk,
+                ShoppingCart,
+                ShoppingCartSerializer,
+                'список покупок'
             )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(recipe=recipe, user=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        deleted_count, _ = ShoppingCart.objects.filter(
-            recipe_id=pk, user=user
-        ).delete()
-
-        if deleted_count:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(
-            {'detail': 'Данного рецепта нет в списке покупок!'},
-            status=status.HTTP_404_NOT_FOUND,
+        return self._remove_relation(
+            request, pk, ShoppingCart, 'списке покупок'
         )
 
     @staticmethod

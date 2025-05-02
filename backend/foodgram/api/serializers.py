@@ -2,13 +2,12 @@ import base64
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from django.db.models import F
+from django.db.models import Count, F
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-# from api.constants import VALIDATE_MSG_1, VALIDATE_MSG_2, VALIDATE_MSG_3
 from recipes.models import (
     Ingredient,
     IngredientInRecipe,
@@ -135,10 +134,16 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    """Отображение списка корзины."""
+    """Сериализатор для корзины покупок."""
 
-    class Meta(FavoriteSerializer.Meta):
+    id = serializers.ReadOnlyField(source='recipe.id')
+    name = serializers.ReadOnlyField(source='recipe.name')
+    image = serializers.ImageField(source='recipe.image', read_only=True)
+    cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
+
+    class Meta:
         model = ShoppingCart
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class FollowCreateSerializer(serializers.ModelSerializer):
@@ -159,6 +164,16 @@ class FollowCreateSerializer(serializers.ModelSerializer):
                 'Вы уже подписаны на этого пользователя!'
             )
         return data
+
+    def to_representation(self, instance):
+
+        author_annotated = User.objects.annotate(
+            recipes_count=Count('recipes')
+        ).filter(id=instance.subscribed_to.id).first()
+        return FollowReadSerializer(
+            author_annotated,
+            context=self.context
+        ).data
 
 
 class FollowReadSerializer(UserSerializer):
@@ -256,37 +271,50 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        Валидация ингредиентов,
-        тегов и изображения перед созданием/обновлением.
+        Валидация ингредиентов, тегов и изображения перед
+        созданием/обновлением.
         """
         if 'image' not in self.initial_data or not self.initial_data['image']:
-            raise serializers.ValidationError({
-                'image': 'Поле изображения обязательно и не может быть пустым!'
-            })
+            raise serializers.ValidationError(
+                'Поле изображения не может быть пустым!',
+                code='invalid'
+            )
+
         ingredients = self.initial_data.get('ingredients', [])
         if not ingredients:
-            raise serializers.ValidationError({
-                'ingredients': 'Должен быть минимум один ингредиент!'
-            })
-        ingredients_ids = {ingredient['id'] for ingredient in ingredients}
+            raise serializers.ValidationError(
+                'Должен быть минимум один ингредиент!',
+                code='invalid'
+            )
+
+        ingredients_ids = [ingredient['id'] for ingredient in ingredients]
+        if len(ingredients_ids) != len(set(ingredients_ids)):
+            raise serializers.ValidationError(
+                'Ингредиенты не должны повторяться!',
+                code='invalid'
+            )
+
         existing_ids = set(Ingredient.objects.filter(
             id__in=ingredients_ids
         ).values_list('id', flat=True))
-        if len(ingredients_ids) != len(set(ingredients_ids)):
-            raise serializers.ValidationError({
-                'ingredients': 'Ингредиенты не должны повторяться!'
-            })
-        if missing_ids := ingredients_ids - existing_ids:
+        if missing_ids := set(ingredients_ids) - existing_ids:
             raise serializers.ValidationError(
-                f'Ингредиент с id: {missing_ids} не существует!'
+                f'Ингредиент с id: {missing_ids} не существует!',
+                code='invalid'
             )
+
         tags = self.initial_data.get('tags', [])
         if not tags:
-            raise serializers.ValidationError({
-                'tags': 'Добавьте минимум один тег!'
-            })
+            raise serializers.ValidationError(
+                'Добавьте минимум один тег!',
+                code='invalid'
+            )
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError('Теги не должны повторяться!')
+            raise serializers.ValidationError(
+                'Теги не должны повторяться!',
+                code='invalid'
+            )
+
         return {
             **data,
             'ingredients': ingredients,
