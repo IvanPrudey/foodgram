@@ -161,42 +161,23 @@ class FollowCreateSerializer(serializers.ModelSerializer):
         return data
 
 
-class FollowReadSerializer(serializers.ModelSerializer):
+class FollowReadSerializer(UserSerializer):
     """Для подписок с информацией о пользователе и его рецептах."""
 
-    is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.IntegerField(default=0)
 
-    class Meta:
-        model = User
-        fields = (
-            'avatar',
-            'email',
-            'first_name',
-            'id',
-            'is_subscribed',
-            'last_name',
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + [
             'recipes_count',
             'recipes',
-            'username'
-        )
-        read_only_fields = (
+        ]
+        read_only_fields = UserSerializer.Meta.read_only_fields + [
             'email',
             'first_name',
-            'id',
             'last_name',
             'username'
-        )
-
-    def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if not request or not request.user.is_authenticated:
-            return False
-        return Subscription.objects.filter(
-            subscribed_to=obj,
-            user=request.user
-        ).exists()
+        ]
 
     def get_recipes(self, obj):
         request = self.context.get('request')
