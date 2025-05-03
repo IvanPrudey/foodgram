@@ -18,7 +18,7 @@ services:
     image: ivpru/foodgram_backend:latest
     volumes:
       - static_value:/backend_static
-      - media_value:/app/foodgram/media/
+      - media_value:/app/media/
     depends_on:
       - db
     env_file:
