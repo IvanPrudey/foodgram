@@ -26,6 +26,12 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username', 'email', 'first_name', 'last_name')
     ordering = ('username',)
     readonly_fields = ('date_joined', 'last_login')
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2'),
+        }),
+    )
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
