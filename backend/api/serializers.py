@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db.models import Count, F
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from drf_extra_fields.fields import Base64ImageField
+from drf_extra_fields.fields import Base64ImageField  # noqa: F811
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -23,7 +23,7 @@ from users.models import Subscription
 User = get_user_model()
 
 
-class Base64ImageField(serializers.ImageField):
+class Base64ImageField(serializers.ImageField):  # noqa: F811
     """Для обработки изображений, преобразует строку base64 в файл."""
 
     def to_internal_value(self, data):
