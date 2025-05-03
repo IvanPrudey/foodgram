@@ -47,12 +47,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt 
 ```
 
-Перейти в директорию с файлом manage.py: 
-```
-/backend/foodgram
-```
-
-Создать и применить миграции: 
+Создать и применить миграции из директории с файлом manage.py - foodgram/backend: 
 ```
 python manage.py makemigrations
 python manage.py migrate
