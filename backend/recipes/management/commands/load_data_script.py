@@ -29,7 +29,7 @@ class Command(BaseCommand):
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                Ingredient.objects.get_or_create(
+                Ingredient.objects.update_or_create(
                     name=row['name'],
                     measurement_unit=row['measurement_unit']
                 )
