@@ -12,7 +12,7 @@
 * информирования сообщением в TG об успешном деплое .
 
 ## 🌐 Ссылка:  
-🔗 [https://foodgramchik.hopto.org](https://foodgramchik.hopto.org)
+🔗 [https://profoodgramchik.hopto.org](https://profoodgramchik.hopto.org)
 
 ## Cтек использованных технологий:
 ```
